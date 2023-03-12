@@ -45,7 +45,7 @@ public class KitCommand extends Command {
                 }
                 break;
             case "add":
-                if (args.length < 5) {
+                if (args.length < 5 || !player.isOp()) {
                     return false;
                 }
 
@@ -53,7 +53,7 @@ public class KitCommand extends Command {
                 String displayName = args[2];
                 String permission = args[3];
 
-                int cooldown = 0;
+                int cooldown;
 
                 try {
                     cooldown = Integer.parseInt(args[4]);
@@ -67,7 +67,7 @@ public class KitCommand extends Command {
 
                 break;
             case "remove":
-                if (args.length < 2) {
+                if (args.length < 2 || !player.isOp()) {
                     return false;
                 }
 
