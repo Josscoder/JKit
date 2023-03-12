@@ -1,0 +1,139 @@
+package josscoder.jkit.command;
+
+import cn.nukkit.Player;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.utils.TextFormat;
+import com.denzelcode.form.element.Button;
+import com.denzelcode.form.window.SimpleWindowForm;
+import josscoder.jkit.JKitPlugin;
+import josscoder.jkit.data.Kit;
+import josscoder.jkit.helper.Helper;
+
+import java.time.Duration;
+
+public class KitCommand extends Command {
+
+    public KitCommand() {
+        super("kit", "Give a kit", TextFormat.RED + "/kit help");
+    }
+
+    @Override
+    public boolean execute(CommandSender sender, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            return false;
+        }
+
+        Player player = (Player) sender;
+
+        if (args.length == 0) {
+            selectKit(player);
+            return false;
+        }
+
+        Helper helper = JKitPlugin.getInstance().getHelper();
+
+        String child = args[0];
+
+        switch (child.toLowerCase()) {
+            case "help":
+                player.sendMessage(TextFormat.colorize("&l&9Kit Commands"));
+                player.sendMessage(TextFormat.WHITE + "/kit help");
+                if (player.isOp()) {
+                    player.sendMessage(TextFormat.WHITE + "/kit add <id> <display name> <permission> <cooldown>");
+                    player.sendMessage(TextFormat.WHITE + "/kit remove <id>");
+                }
+                break;
+            case "add":
+                if (args.length < 5) {
+                    return false;
+                }
+
+                String id = args[1];
+                String displayName = args[2];
+                String permission = args[3];
+
+                int cooldown = 0;
+
+                try {
+                    cooldown = Integer.parseInt(args[4]);
+                } catch (Exception e) {
+                    player.sendMessage(TextFormat.RED + "Kit cooldown should be int");
+                    return false;
+                }
+
+                helper.registerKit(new Kit(id, displayName, permission, cooldown, player.getInventory()), true);
+                player.sendMessage(TextFormat.GREEN + String.format("Kit %s saved successfully!", id));
+
+                break;
+            case "remove":
+                if (args.length < 2) {
+                    return false;
+                }
+
+                String idToRemove = args[1];
+
+                if (!helper.kitExists(idToRemove)) {
+                    player.sendMessage(TextFormat.RED + "That kit does not exist!");
+                    return false;
+                }
+
+                helper.unregisterKit(idToRemove);
+                player.sendMessage(TextFormat.RED + "You removed kit %s");
+                break;
+        }
+
+        return false;
+    }
+
+
+    private void selectKit(Player player) {
+        SimpleWindowForm windowForm = new SimpleWindowForm("SELECT A KIT");
+
+        Helper helper = JKitPlugin.getInstance().getHelper();
+
+        helper.getKitList().values().forEach(kit -> windowForm.addButton(kit.getId(), String.format(
+                "%s\n%s",
+                kit.getName(),
+                (kit.isAvailable(player) ? TextFormat.DARK_GREEN + "Available" : TextFormat.DARK_RED + "No available")
+        ), kit.getImage()));
+
+        windowForm.addHandler(event -> {
+            if (event.wasClosed()) {
+                return;
+            }
+
+            Button button = event.getButton();
+            if (button == null) {
+                return;
+            }
+
+            String buttonName = button.getName();
+
+            Kit kit = helper.getKit(buttonName);
+            if (kit == null) {
+                return;
+            }
+
+            if (!player.hasPermission(kit.getPermission())) {
+                player.sendMessage(TextFormat.RED + "You do not have permission to equip this kit!");
+
+                return;
+            }
+
+            if (kit.hasCooldown(player) && !player.isOp()) {
+                int secondsLeft = kit.getTimeLeft(player) - helper.getCurrentSeconds();
+                Duration duration = Duration.ofSeconds(secondsLeft);
+                String durationString = JKitPlugin.getInstance().getHelper().formatDuration(duration);
+
+                player.sendMessage(TextFormat.RED + String.format("You have to wait %s to equip this kit again!", durationString));
+
+                return;
+            }
+
+            kit.give(player);
+            player.sendMessage(TextFormat.colorize(String.format("&aYou have equipped the kit %s&a!", kit.getName())));
+        });
+        windowForm.sendTo(player);
+    }
+}
