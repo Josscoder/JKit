@@ -79,7 +79,7 @@ public class KitCommand extends Command {
                 }
 
                 helper.unregisterKit(idToRemove);
-                player.sendMessage(TextFormat.RED + "You removed kit %s");
+                player.sendMessage(TextFormat.RED + String.format("You removed kit %s", idToRemove));
                 break;
         }
 
