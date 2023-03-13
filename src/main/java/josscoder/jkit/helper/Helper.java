@@ -51,10 +51,10 @@ public class Helper {
         mainSection.set("name", kit.getName());
         mainSection.set("permission", kit.getPermission());
         mainSection.set("cooldown", kit.getCooldown());
-        mainSection.set("helmet", itemToString(kit.getHelmet()));
-        mainSection.set("chestPlate", itemToString(kit.getChestPlate()));
-        mainSection.set("leggings", itemToString(kit.getLeggings()));
-        mainSection.set("boots", itemToString(kit.getBoots()));
+        mainSection.set("helmet", String.valueOf(kit.getHelmet().getId()));
+        mainSection.set("chestPlate", String.valueOf(kit.getChestPlate().getId()));
+        mainSection.set("leggings", String.valueOf(kit.getLeggings().getId()));
+        mainSection.set("boots", String.valueOf(kit.getBoots().getId()));
 
         ConfigSection itemsSection = new ConfigSection();
         kit.getItemList().forEach((index, item) -> {
