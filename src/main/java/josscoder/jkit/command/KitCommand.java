@@ -88,7 +88,7 @@ public class KitCommand extends Command {
 
 
     private void selectKit(Player player) {
-        SimpleWindowForm windowForm = new SimpleWindowForm("SELECT A KIT");
+        SimpleWindowForm windowForm = new SimpleWindowForm("Majestic Kits");
 
         Helper helper = JKitPlugin.getInstance().getHelper();
 
