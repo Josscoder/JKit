@@ -77,7 +77,7 @@ public class Kit {
                 });
             }
 
-            itemList.put(Integer.valueOf(key), item);
+            itemList.put(Integer.parseInt(key), item);
         });
     }
 
