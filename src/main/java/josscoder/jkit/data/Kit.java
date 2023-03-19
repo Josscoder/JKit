@@ -61,13 +61,17 @@ public class Kit {
                     itemData.length == 3 ? Integer.parseInt(itemData[2]) : 1
             );
 
+            if (currentItemSection.exists("customName")) {
+                item.setCustomName(currentItemSection.getString("customName"));
+            }
+
             List<String> enchantmentsList = currentItemSection.getStringList("enchantments");
             if (!enchantmentsList.isEmpty()) {
                 enchantmentsList.forEach(enchantment -> {
                     String[] split = enchantment.split(":");
                     if (enchantment.length() > 0 && split.length > 0) {
                         Enchantment enchantment1 = Enchantment.getEnchantment(Integer.parseInt(split[0]))
-                                .setLevel(split.length == 2 ? Integer.parseInt(split[1]) : 1);
+                                .setLevel(split.length == 2 ? Integer.parseInt(split[1]) : 1, false);
                         item.addEnchantment(enchantment1);
                     }
                 });
