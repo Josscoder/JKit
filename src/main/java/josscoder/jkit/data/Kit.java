@@ -46,10 +46,10 @@ public class Kit {
         this.name = mainSection.getString("name", "No name");
         this.permission = mainSection.getString("permission", "kit.permission");
         this.cooldown = mainSection.getInt("cooldown");
-        this.helmet = Item.get(mainSection.getInt("helmet"));
-        this.chestPlate = Item.get(mainSection.getInt("chestPlate"));
-        this.leggings = Item.get(mainSection.getInt("leggings"));
-        this.boots = Item.get(mainSection.getInt("boots"));
+        this.helmet = Item.get(Integer.parseInt(mainSection.getString("helmet")));
+        this.chestPlate = Item.get(Integer.parseInt(mainSection.getString("chestPlate")));
+        this.leggings = Item.get(Integer.parseInt(mainSection.getString("leggings")));
+        this.boots = Item.get(Integer.parseInt(mainSection.getString("boots")));
 
         ConfigSection itemsSection = mainSection.getSection("items");
         itemsSection.getSections().getKeys(false).forEach(key -> {
