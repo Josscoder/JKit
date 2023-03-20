@@ -59,6 +59,9 @@ public class Helper {
         ConfigSection itemsSection = new ConfigSection();
         kit.getItemList().forEach((index, item) -> {
             ConfigSection currentItemSection = new ConfigSection();
+            if (item.hasCustomName()) {
+                currentItemSection.set("customName", item.getCustomName());
+            }
             currentItemSection.set("data", itemToString(item));
             currentItemSection.set("enchantments", enchantmentsToStringList(item.getEnchantments()));
 
