@@ -10,8 +10,6 @@ import josscoder.jkit.JKitPlugin;
 import josscoder.jkit.data.Kit;
 import josscoder.jkit.helper.Helper;
 
-import java.time.Duration;
-
 public class KitCommand extends Command {
 
     public KitCommand() {
@@ -92,11 +90,16 @@ public class KitCommand extends Command {
 
         Helper helper = JKitPlugin.getInstance().getHelper();
 
-        helper.getKitList().values().forEach(kit -> windowForm.addButton(kit.getId(), String.format(
-                "%s\n%s",
-                kit.getName(),
-                (kit.isAvailable(player) ? TextFormat.DARK_GREEN + "Available" : TextFormat.DARK_RED + "No available")
-        ), kit.getImage()));
+        helper.getKitList().values().forEach(kit -> {
+            String timeLeft = kit.getTimeLeftString(player);
+            String state = (kit.isAvailable(player) ? TextFormat.DARK_GREEN + "Available" : TextFormat.DARK_RED + (kit.hasCooldown(player) ? timeLeft : "No available"));
+
+            windowForm.addButton(kit.getId(), String.format(
+                    "%s\n%s",
+                    kit.getName(),
+                    state
+            ), kit.getImage());
+        });
 
         windowForm.addHandler(event -> {
             if (event.wasClosed()) {
@@ -122,11 +125,8 @@ public class KitCommand extends Command {
             }
 
             if (kit.hasCooldown(player) && !player.isOp()) {
-                int secondsLeft = kit.getTimeLeft(player) - helper.getCurrentSeconds();
-                Duration duration = Duration.ofSeconds(secondsLeft);
-                String durationString = JKitPlugin.getInstance().getHelper().formatDuration(duration);
-
-                player.sendMessage(TextFormat.RED + String.format("You have to wait %s to equip this kit again!", durationString));
+                String timeLeft = kit.getTimeLeftString(player);
+                player.sendMessage(TextFormat.RED + String.format("You have to wait %s to equip this kit again!", timeLeft));
 
                 return;
             }

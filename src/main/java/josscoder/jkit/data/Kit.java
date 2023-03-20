@@ -3,14 +3,14 @@ package josscoder.jkit.data;
 import cn.nukkit.Player;
 import cn.nukkit.inventory.PlayerInventory;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import josscoder.jkit.JKitPlugin;
+import josscoder.jkit.helper.Helper;
 import lombok.Getter;
 
+import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -40,43 +40,22 @@ public class Kit {
         this.itemList.putAll(playerInventory.getContents());
     }
 
-    public Kit(String id, ConfigSection mainSection) {
+    public Kit(String id, ConfigSection mainSection, Helper helper) {
         this.id = id;
         this.image = mainSection.getString("image", "textures/blocks/barrier.png");
         this.name = mainSection.getString("name", "No name");
         this.permission = mainSection.getString("permission", "kit.permission");
         this.cooldown = mainSection.getInt("cooldown");
-        this.helmet = Item.get(Integer.parseInt(mainSection.getString("helmet")));
-        this.chestPlate = Item.get(Integer.parseInt(mainSection.getString("chestPlate")));
-        this.leggings = Item.get(Integer.parseInt(mainSection.getString("leggings")));
-        this.boots = Item.get(Integer.parseInt(mainSection.getString("boots")));
+
+        this.helmet = helper.readItemDataFromSection(mainSection.getSection("helmet"));
+        this.chestPlate = helper.readItemDataFromSection(mainSection.getSection("chestPlate"));
+        this.leggings = helper.readItemDataFromSection(mainSection.getSection("leggings"));
+        this.boots = helper.readItemDataFromSection(mainSection.getSection("boots"));
 
         ConfigSection itemsSection = mainSection.getSection("items");
         itemsSection.getSections().getKeys(false).forEach(key -> {
             ConfigSection currentItemSection = itemsSection.getSection(key);
-            String[] itemData = currentItemSection.getString("data").split(":");
-
-            Item item = Item.get(Integer.parseInt(itemData[0]),
-                    itemData.length >= 2 ? Integer.parseInt(itemData[1]) : 0,
-                    itemData.length == 3 ? Integer.parseInt(itemData[2]) : 1
-            );
-
-            if (currentItemSection.exists("customName")) {
-                item.setCustomName(currentItemSection.getString("customName"));
-            }
-
-            List<String> enchantmentsList = currentItemSection.getStringList("enchantments");
-            if (!enchantmentsList.isEmpty()) {
-                enchantmentsList.forEach(enchantment -> {
-                    String[] split = enchantment.split(":");
-                    if (enchantment.length() > 0 && split.length > 0) {
-                        Enchantment enchantment1 = Enchantment.getEnchantment(Integer.parseInt(split[0]))
-                                .setLevel(split.length == 2 ? Integer.parseInt(split[1]) : 1, false);
-                        item.addEnchantment(enchantment1);
-                    }
-                });
-            }
-
+            Item item = helper.readItemDataFromSection(currentItemSection);
             itemList.put(Integer.parseInt(key), item);
         });
     }
@@ -99,6 +78,14 @@ public class Kit {
 
     public boolean isAvailable(Player player) {
         return !hasCooldown(player) || player.isOp() || player.hasPermission(permission);
+    }
+
+    public String getTimeLeftString(Player player) {
+        Helper helper = JKitPlugin.getInstance().getHelper();
+
+        int secondsLeft = getTimeLeft(player) - helper.getCurrentSeconds();
+        Duration duration = Duration.ofSeconds(secondsLeft);
+        return helper.formatDuration(duration);
     }
 
     public void give(Player player) {
