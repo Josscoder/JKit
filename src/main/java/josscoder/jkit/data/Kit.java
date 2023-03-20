@@ -77,7 +77,7 @@ public class Kit {
     }
 
     public boolean isAvailable(Player player) {
-        return !hasCooldown(player) || player.isOp() || player.hasPermission(permission);
+        return !hasCooldown(player) && player.hasPermission(permission);
     }
 
     public String getTimeLeftString(Player player) {
